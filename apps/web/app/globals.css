@@ -1,0 +1,40 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --bg: 255 255 255;
+    --fg: 15 23 42;
+    --muted: 71 85 105;
+    --brand: 0 181 226;
+    --brand-fg: 10 31 61;
+    color-scheme: light;
+  }
+
+  html, body {
+    background: rgb(var(--bg));
+    color: rgb(var(--fg));
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+}
+
+@layer components {
+  .ad-card {
+    @apply rounded-lg bg-white border border-navy-100 shadow-soft;
+  }
+  .ad-card-hover {
+    @apply transition hover:shadow-card hover:border-cyan-200;
+  }
+  .ad-pill {
+    @apply inline-flex items-center gap-1.5 rounded-pill px-2.5 py-1 text-xs font-medium;
+  }
+  .ad-btn-primary {
+    @apply inline-flex items-center justify-center gap-2 rounded-md bg-cyan-500 px-4 py-2 text-sm font-semibold text-white shadow-soft transition hover:bg-cyan-600 focus:outline-none focus:ring-2 focus:ring-cyan-300;
+  }
+  .ad-btn-ghost {
+    @apply inline-flex items-center justify-center gap-2 rounded-md px-3 py-2 text-sm font-medium text-navy-700 transition hover:bg-mist;
+  }
+}

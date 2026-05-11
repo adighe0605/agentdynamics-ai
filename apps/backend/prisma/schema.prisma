@@ -1,0 +1,242 @@
+// AgentDynamics — backend schema.
+// Models reflect the automotive AI-employee product domain:
+// dealerships → users, leads, calls, appointments, campaigns, notifications.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+enum UserRole {
+  owner
+  manager
+  sales
+  service
+  viewer
+}
+
+enum LeadStatus {
+  new
+  qualifying
+  appointment_booked
+  handed_off
+  won
+  lost
+}
+
+enum LeadIntent {
+  sales
+  service
+  parts
+  general
+}
+
+enum LeadSource {
+  inbound_call
+  sms
+  email
+  web
+}
+
+enum CallChannel {
+  voice
+  sms
+  email
+}
+
+enum CallDirection {
+  inbound
+  outbound
+}
+
+enum CallOutcome {
+  qualified
+  appointment_booked
+  voicemail
+  handoff_requested
+  spam
+  no_answer
+}
+
+enum AppointmentType {
+  test_drive
+  service
+  consultation
+}
+
+enum AppointmentStatus {
+  scheduled
+  confirmed
+  completed
+  no_show
+  cancelled
+}
+
+enum CampaignType {
+  sales
+  service
+}
+
+enum CampaignStatus {
+  draft
+  running
+  paused
+  completed
+}
+
+enum NotificationKind {
+  hot_lead
+  appointment_booked
+  handoff_requested
+  missed_call
+  campaign_completed
+}
+
+model Dealership {
+  id          String   @id @default(cuid())
+  name        String
+  brand       String
+  location    String
+  timezone    String
+  phoneNumber String
+  createdAt   DateTime @default(now())
+
+  users         User[]
+  leads         Lead[]
+  calls         Call[]
+  appointments  Appointment[]
+  campaigns     Campaign[]
+}
+
+model User {
+  id           String   @id @default(cuid())
+  dealershipId String
+  email        String   @unique
+  fullName     String
+  role         UserRole @default(sales)
+  avatarUrl    String?
+  createdAt    DateTime @default(now())
+
+  dealership    Dealership     @relation(fields: [dealershipId], references: [id], onDelete: Cascade)
+  assignedLeads Lead[]         @relation("AssignedLeads")
+  notifications Notification[]
+
+  @@index([dealershipId])
+}
+
+model Lead {
+  id               String     @id @default(cuid())
+  dealershipId     String
+  fullName         String
+  phone            String
+  email            String?
+  vehicleInterest  String?
+  intent           LeadIntent
+  status           LeadStatus @default(new)
+  score            Int        @default(0)
+  source           LeadSource
+  createdAt        DateTime   @default(now())
+  lastTouchAt      DateTime   @default(now())
+  assignedToUserId String?
+
+  dealership   Dealership    @relation(fields: [dealershipId], references: [id], onDelete: Cascade)
+  assignedTo   User?         @relation("AssignedLeads", fields: [assignedToUserId], references: [id])
+  calls        Call[]
+  appointments Appointment[]
+
+  @@index([dealershipId, status])
+  @@index([dealershipId, createdAt])
+}
+
+model Call {
+  id              String        @id @default(cuid())
+  dealershipId    String
+  leadId          String?
+  channel         CallChannel
+  direction       CallDirection
+  startedAt       DateTime
+  endedAt         DateTime?
+  durationSeconds Int?
+  outcome         CallOutcome
+  summary         String?
+  transcript      Json?
+  recordingUrl    String?
+  createdAt       DateTime      @default(now())
+
+  dealership Dealership @relation(fields: [dealershipId], references: [id], onDelete: Cascade)
+  lead       Lead?      @relation(fields: [leadId], references: [id])
+
+  @@index([dealershipId, startedAt])
+  @@index([leadId])
+}
+
+model Appointment {
+  id              String            @id @default(cuid())
+  dealershipId    String
+  leadId          String
+  type            AppointmentType
+  scheduledAt     DateTime
+  durationMinutes Int               @default(45)
+  bookedByAi      Boolean           @default(true)
+  status          AppointmentStatus @default(scheduled)
+  notes           String?
+  createdAt       DateTime          @default(now())
+
+  dealership Dealership @relation(fields: [dealershipId], references: [id], onDelete: Cascade)
+  lead       Lead       @relation(fields: [leadId], references: [id], onDelete: Cascade)
+
+  @@index([dealershipId, scheduledAt])
+}
+
+model Campaign {
+  id                  String         @id @default(cuid())
+  dealershipId        String
+  name                String
+  type                CampaignType
+  status              CampaignStatus @default(draft)
+  audienceSize        Int            @default(0)
+  startedAt           DateTime?
+  contacted           Int            @default(0)
+  responded           Int            @default(0)
+  appointmentsBooked  Int            @default(0)
+  revenueAttributed   Decimal?       @db.Decimal(12, 2)
+  createdAt           DateTime       @default(now())
+
+  dealership Dealership @relation(fields: [dealershipId], references: [id], onDelete: Cascade)
+
+  @@index([dealershipId, status])
+}
+
+model Notification {
+  id        String           @id @default(cuid())
+  userId    String
+  kind      NotificationKind
+  title     String
+  body      String
+  payload   Json?
+  createdAt DateTime         @default(now())
+  readAt    DateTime?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, createdAt])
+}
+
+model AiUsageLog {
+  id           String   @id @default(cuid())
+  dealershipId String
+  provider     String   // "openai" | "anthropic"
+  model        String
+  feature      String   // "handoff_summary" | "lead_score" | "campaign_copy"
+  inputTokens  Int
+  outputTokens Int
+  costUsd      Decimal  @db.Decimal(10, 4)
+  createdAt    DateTime @default(now())
+
+  @@index([dealershipId, createdAt])
+}
