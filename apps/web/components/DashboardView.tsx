@@ -120,13 +120,13 @@ export function DashboardView() {
   const range = rangeLabel(snap.dailyCallVolume);
 
   return (
-    <main className="p-6 pb-20">
+    <main className="p-4 pb-24 sm:p-6 lg:pb-20">
       <header className="flex flex-wrap items-start justify-between gap-3">
         <div>
-          <h1 className="text-2xl font-semibold tracking-tight text-navy-900">
+          <h1 className="text-xl font-semibold tracking-tight text-navy-900 sm:text-2xl">
             {DEALERSHIP_NAME}
           </h1>
-          <p className="mt-1 text-sm text-slate">
+          <p className="mt-1 text-xs text-slate sm:text-sm">
             Welcome back! Here&apos;s what&apos;s happening with your Voice AI leads.
           </p>
         </div>
@@ -135,7 +135,7 @@ export function DashboardView() {
             <button
               key={p.key}
               onClick={() => setPeriod(p.key)}
-              className={`rounded-md px-3 py-1.5 text-xs font-semibold transition ${
+              className={`rounded-md px-2.5 py-1.5 text-[11px] font-semibold transition sm:px-3 sm:text-xs ${
                 period === p.key
                   ? "bg-navy-900 text-white"
                   : "text-navy-700 hover:bg-mist"
@@ -155,27 +155,29 @@ export function DashboardView() {
       </section>
 
       <section className="mt-6 grid grid-cols-1 gap-4 xl:grid-cols-2">
-        <div className="rounded-xl border border-navy-100 bg-white p-5 shadow-soft">
+        <div className="rounded-xl border border-navy-100 bg-white p-4 shadow-soft sm:p-5">
           <div className="flex items-center justify-between">
-            <h2 className="text-base font-semibold text-navy-900">Daily Call Volume</h2>
-            <span className="text-xs text-slate">{range}</span>
+            <h2 className="text-sm font-semibold text-navy-900 sm:text-base">Daily Call Volume</h2>
+            <span className="text-[11px] text-slate sm:text-xs">{range}</span>
           </div>
-          <div className="mt-4 h-64">
+          <div className="mt-4 h-72 sm:h-64">
             <ResponsiveContainer width="100%" height="100%">
-              <LineChart data={snap.dailyCallVolume.map((d) => ({ ...d, label: fmtMonthDay(d.date) }))} margin={{ top: 10, right: 10, left: -10, bottom: 0 }}>
-                <CartesianGrid stroke="#E1E8F2" strokeDasharray="3 3" />
+              <LineChart data={snap.dailyCallVolume.map((d) => ({ ...d, label: fmtMonthDay(d.date) }))} margin={{ top: 10, right: 12, left: -8, bottom: 0 }}>
+                <CartesianGrid stroke="#E1E8F2" strokeDasharray="3 3" vertical={false} />
                 <XAxis
                   dataKey="label"
-                  tick={{ fontSize: 11, fill: "#475569" }}
+                  tick={{ fontSize: 12, fill: "#475569" }}
                   tickLine={false}
                   axisLine={{ stroke: "#E1E8F2" }}
-                  interval={Math.max(0, Math.floor(snap.dailyCallVolume.length / 10) - 1)}
+                  interval="preserveStartEnd"
+                  minTickGap={32}
                 />
                 <YAxis
-                  tick={{ fontSize: 11, fill: "#475569" }}
+                  tick={{ fontSize: 12, fill: "#475569" }}
                   tickLine={false}
                   axisLine={false}
-                  width={36}
+                  width={32}
+                  tickCount={5}
                 />
                 <Tooltip
                   contentStyle={{
@@ -191,8 +193,8 @@ export function DashboardView() {
                   type="monotone"
                   dataKey="calls"
                   stroke="#2563EB"
-                  strokeWidth={2}
-                  dot={{ r: 2.5, fill: "#2563EB", strokeWidth: 0 }}
+                  strokeWidth={2.5}
+                  dot={false}
                   activeDot={{ r: 5, fill: "#2563EB", stroke: "#FFFFFF", strokeWidth: 2 }}
                 />
               </LineChart>
@@ -200,13 +202,13 @@ export function DashboardView() {
           </div>
         </div>
 
-        <div className="rounded-xl border border-navy-100 bg-white p-5 shadow-soft">
+        <div className="rounded-xl border border-navy-100 bg-white p-4 shadow-soft sm:p-5">
           <div className="flex items-center justify-between">
-            <h2 className="text-base font-semibold text-navy-900">Lead Source Breakdown</h2>
-            <span className="text-xs text-slate">{range}</span>
+            <h2 className="text-sm font-semibold text-navy-900 sm:text-base">Lead Source Breakdown</h2>
+            <span className="text-[11px] text-slate sm:text-xs">{range}</span>
           </div>
-          <div className="mt-2 flex items-center gap-6">
-            <div className="h-56 w-56 shrink-0">
+          <div className="mt-4 flex flex-col items-center gap-5 sm:flex-row sm:gap-6">
+            <div className="h-52 w-52 shrink-0 sm:h-56 sm:w-56">
               <ResponsiveContainer>
                 <PieChart>
                   <Pie
@@ -214,7 +216,7 @@ export function DashboardView() {
                     dataKey="share"
                     nameKey="label"
                     innerRadius={0}
-                    outerRadius={88}
+                    outerRadius={86}
                     paddingAngle={1}
                     stroke="#FFFFFF"
                     strokeWidth={2}
@@ -235,17 +237,17 @@ export function DashboardView() {
                 </PieChart>
               </ResponsiveContainer>
             </div>
-            <ul className="flex-1 space-y-2">
+            <ul className="grid w-full grid-cols-2 gap-x-4 gap-y-2 sm:flex sm:flex-1 sm:flex-col sm:gap-x-0 sm:gap-y-2">
               {snap.leadSourceBreakdown.map((s, i) => (
                 <li key={s.source} className="flex items-center justify-between text-sm">
-                  <span className="flex items-center gap-2">
+                  <span className="flex min-w-0 items-center gap-2">
                     <span
-                      className="h-2.5 w-2.5 rounded-full"
+                      className="h-2.5 w-2.5 shrink-0 rounded-full"
                       style={{ background: PIE_COLORS[i % PIE_COLORS.length] }}
                     />
-                    <span className="text-navy-800">{s.label}</span>
+                    <span className="truncate text-navy-800">{s.label}</span>
                   </span>
-                  <span className="font-semibold text-navy-900">
+                  <span className="shrink-0 font-semibold text-navy-900">
                     {(s.share * 100).toFixed(0)}%
                   </span>
                 </li>
