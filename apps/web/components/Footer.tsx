@@ -1,6 +1,6 @@
 export function Footer() {
   return (
-    <footer className="fixed inset-x-0 bottom-0 z-20 border-t border-navy-700 bg-navy-900">
+    <footer className="fixed inset-x-0 bottom-0 z-20 hidden border-t border-navy-700 bg-navy-900 lg:block">
       <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-6 py-3 text-xs text-navy-200">
         <div className="flex items-center gap-3">
           <svg

@@ -1,30 +1,24 @@
 "use client";
 
-import { useRef, useState } from "react";
-import { mockCalls } from "@agentdynamics/types/mock";
+import { useEffect, useRef, useState } from "react";
 
 type ChatMsg = { role: "user" | "assistant"; text: string };
 
 const SUGGESTIONS = [
-  "Summarize my hottest lead this week",
+  "Show my hottest leads",
   "Draft a follow-up SMS to Marcus Hill",
-  "Which test drives are still unconfirmed?",
-  "How did Spring Service Reminders perform?",
+  "Which appointments are still unconfirmed?",
+  "Do we have any RAV4 Hybrid in stock?",
 ];
 
-/**
- * Reads the SSE stream emitted by /api/ai/handoff-summary. The route is
- * provider-agnostic — currently a placeholder generator, drop-in replaceable
- * with the Anthropic or OpenAI streaming SDK once an API key is set.
- */
-async function streamSummary(
-  transcript: Array<{ speaker: string; text: string }>,
+async function streamChat(
+  messages: ChatMsg[],
   onDelta: (chunk: string) => void
 ): Promise<void> {
-  const res = await fetch("/api/ai/handoff-summary", {
+  const res = await fetch("/api/ai/chat", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ transcript }),
+    body: JSON.stringify({ messages }),
   });
   if (!res.ok || !res.body) throw new Error(`HTTP ${res.status}`);
 
@@ -40,6 +34,7 @@ async function streamSummary(
     for (const ev of events) {
       const data = ev.replace(/^data: /, "").trim();
       if (data === "[DONE]") return;
+      if (!data) continue;
       try {
         const parsed = JSON.parse(data);
         if (typeof parsed.delta === "string") onDelta(parsed.delta);
@@ -55,69 +50,69 @@ export default function AssistantPage() {
     {
       role: "assistant",
       text:
-        "Hi! I'm your AgentDynamics assistant. Ask me about leads, calls, or appointments — I can also draft follow-ups for you.",
+        "Hi! I'm your AgentDynamics assistant. I can look at your leads, calls, appointments, and inventory — and draft follow-ups for you. What do you need?",
     },
   ]);
   const [input, setInput] = useState("");
   const [busy, setBusy] = useState(false);
   const endRef = useRef<HTMLDivElement>(null);
 
+  useEffect(() => {
+    endRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages]);
+
   async function send(text?: string) {
     const prompt = (text ?? input).trim();
     if (!prompt || busy) return;
     setInput("");
-    setMessages((m) => [...m, { role: "user", text: prompt }]);
+    const next: ChatMsg[] = [...messages, { role: "user", text: prompt }];
+    setMessages(next);
     setBusy(true);
-
-    // Compose a fake transcript so the existing SSE route has something to chew on.
-    const transcript = [
-      { speaker: "customer", text: prompt },
-      ...(mockCalls[0]?.transcript ?? []),
-    ];
 
     let assistantText = "";
     setMessages((m) => [...m, { role: "assistant", text: "" }]);
 
     try {
-      await streamSummary(transcript, (chunk) => {
+      await streamChat(next, (chunk) => {
         assistantText += chunk;
         setMessages((m) => {
-          const next = [...m];
-          next[next.length - 1] = { role: "assistant", text: assistantText };
-          return next;
+          const arr = [...m];
+          arr[arr.length - 1] = { role: "assistant", text: assistantText };
+          return arr;
         });
       });
     } catch {
       setMessages((m) => {
-        const next = [...m];
-        next[next.length - 1] = {
+        const arr = [...m];
+        arr[arr.length - 1] = {
           role: "assistant",
-          text: "Sorry — the assistant stream failed. Check the /api/ai/handoff-summary route.",
+          text: "Sorry — the assistant stream failed. Check the /api/ai/chat route.",
         };
-        return next;
+        return arr;
       });
     } finally {
       setBusy(false);
-      requestAnimationFrame(() => endRef.current?.scrollIntoView({ behavior: "smooth" }));
     }
   }
 
   return (
-    <main className="flex h-screen flex-col p-6 pb-20">
+    <main className="flex h-[calc(100vh-3.5rem)] flex-col p-4 sm:p-6 lg:h-screen lg:pb-20">
       <header>
-        <h1 className="text-2xl font-semibold tracking-tight text-navy-900">AI Assistant</h1>
-        <p className="mt-1 text-sm text-slate">
-          Streams from <code className="rounded bg-mist px-1 text-xs">/api/ai/handoff-summary</code>.
-          Swap the placeholder generator for Anthropic / OpenAI to make it real.
+        <h1 className="text-xl font-semibold tracking-tight text-navy-900 sm:text-2xl">
+          AI Assistant
+        </h1>
+        <p className="mt-1 text-xs text-slate sm:text-sm">
+          Powered by Gemini when <code className="rounded bg-mist px-1 text-[11px]">GEMINI_API_KEY</code> is set on Vercel.
+          Falls back to a smart template otherwise.
         </p>
       </header>
 
-      <section className="mt-6 flex min-h-0 flex-1 flex-col gap-3 rounded-xl border border-navy-100 bg-white p-5 shadow-soft">
+      <section className="mt-4 flex min-h-0 flex-1 flex-col gap-3 rounded-xl border border-navy-100 bg-white p-3 shadow-soft sm:p-5">
         <div className="flex-1 space-y-3 overflow-y-auto pr-1">
           {messages.map((m, i) => (
             <div
               key={i}
-              className={`max-w-[80%] rounded-xl px-3.5 py-2.5 text-sm leading-relaxed ${
+              className={`max-w-[88%] whitespace-pre-wrap rounded-xl px-3.5 py-2.5 text-sm leading-relaxed sm:max-w-[80%] ${
                 m.role === "user"
                   ? "ml-auto bg-navy-900 text-white"
                   : "bg-mist text-navy-900"

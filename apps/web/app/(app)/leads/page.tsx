@@ -22,8 +22,8 @@ export default function LeadsPage() {
         </div>
       </header>
 
-      <div className="mt-6 overflow-hidden rounded-xl border border-navy-100 bg-white shadow-soft">
-        <table className="w-full text-left text-sm">
+      <div className="mt-6 overflow-x-auto rounded-xl border border-navy-100 bg-white shadow-soft">
+        <table className="w-full min-w-[640px] text-left text-sm">
           <thead className="border-b border-navy-100 bg-cloud text-xs uppercase tracking-wide text-slate">
             <tr>
               <th className="px-5 py-3 font-medium">Lead</th>
