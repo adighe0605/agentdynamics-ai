@@ -67,13 +67,20 @@ function fmtTime(iso: string): string {
   return new Date(iso).toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" });
 }
 
+function startOfLocalDay(d: Date): Date {
+  const x = new Date(d);
+  x.setHours(0, 0, 0, 0);
+  return x;
+}
+
 function fmtAppointmentDay(iso: string): string {
   const d = new Date(iso);
-  const today = new Date("2026-05-10T00:00:00Z");
-  const tomorrow = new Date("2026-05-11T00:00:00Z");
-  const diffDays = Math.floor((d.getTime() - today.getTime()) / 86_400_000);
+  const today = startOfLocalDay(new Date());
+  const target = startOfLocalDay(d);
+  const diffDays = Math.round((target.getTime() - today.getTime()) / 86_400_000);
   if (diffDays === 0) return "Today";
   if (diffDays === 1) return "Tomorrow";
+  if (diffDays === -1) return "Yesterday";
   return d.toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" });
 }
 
@@ -83,7 +90,7 @@ function rangeLabel(volume: Array<{ date: string }>): string {
 }
 
 function todayDate(): string {
-  return new Date("2026-05-10T00:00:00Z").toLocaleDateString("en-US", {
+  return new Date().toLocaleDateString("en-US", {
     weekday: "long",
     month: "long",
     day: "numeric",

@@ -1,6 +1,8 @@
 import { mockAppointments } from "@agentdynamics/types/mock";
 import type { Appointment } from "@agentdynamics/types";
 
+export const dynamic = "force-dynamic";
+
 const typeStyle: Record<Appointment["type"], string> = {
   test_drive: "bg-cyan-50 text-cyan-700 ring-cyan-100",
   service: "bg-amber-50 text-amber-700 ring-amber-100",
@@ -13,7 +15,7 @@ const typeLabel: Record<Appointment["type"], string> = {
   consultation: "Consultation",
 };
 
-function weekDates(anchor = new Date("2026-05-10T00:00:00Z")): Date[] {
+function weekDates(anchor = new Date()): Date[] {
   const start = new Date(anchor);
   start.setUTCDate(start.getUTCDate() - start.getUTCDay() + 1);
   return Array.from({ length: 7 }, (_, i) => {
@@ -68,7 +70,7 @@ export default function AppointmentsPage() {
 
       <section className="mt-6 grid grid-cols-1 gap-3 md:grid-cols-7">
         {days.map((d) => {
-          const today = sameUTCDate(d, new Date("2026-05-10T00:00:00Z"));
+          const today = sameUTCDate(d, new Date());
           const dayAppts = appts.filter((a) => sameUTCDate(new Date(a.scheduledAt), d));
           const { dow, date } = fmtDay(d);
           return (

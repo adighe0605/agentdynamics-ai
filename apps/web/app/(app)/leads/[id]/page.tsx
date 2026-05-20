@@ -4,6 +4,8 @@ import { LeadStatusPill } from "@/components/LeadStatusPill";
 import { leadTimelines, mockLeads } from "@agentdynamics/types/mock";
 import type { LeadEvent } from "@agentdynamics/types";
 
+export const dynamic = "force-dynamic";
+
 const eventIcon: Record<LeadEvent["kind"], string> = {
   lead_created: "✦",
   call_inbound: "◉",

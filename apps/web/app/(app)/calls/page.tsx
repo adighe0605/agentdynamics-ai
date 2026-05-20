@@ -1,5 +1,7 @@
 import { mockCalls } from "@agentdynamics/types/mock";
 
+export const dynamic = "force-dynamic";
+
 function fmtDuration(seconds?: number): string {
   if (!seconds) return "—";
   const m = Math.floor(seconds / 60);

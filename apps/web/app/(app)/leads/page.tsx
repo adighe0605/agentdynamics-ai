@@ -2,6 +2,8 @@ import Link from "next/link";
 import { LeadStatusPill } from "@/components/LeadStatusPill";
 import { mockLeads } from "@agentdynamics/types/mock";
 
+export const dynamic = "force-dynamic";
+
 function timeAgo(iso: string): string {
   const diffMs = Date.now() - new Date(iso).getTime();
   const mins = Math.floor(diffMs / 60000);
