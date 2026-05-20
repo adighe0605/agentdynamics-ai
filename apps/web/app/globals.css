@@ -12,12 +12,28 @@
     color-scheme: light;
   }
 
+  html {
+    scroll-behavior: smooth;
+  }
+
   html, body {
     background: rgb(var(--bg));
     color: rgb(var(--fg));
-    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    font-family: var(--font-inter), 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+  }
+
+  *:focus-visible {
+    outline: 2px solid #00B5E2;
+    outline-offset: 2px;
+    border-radius: 4px;
+  }
+
+  ::selection {
+    background: #C6EFFC;
+    color: #061428;
   }
 }
 
@@ -32,9 +48,51 @@
     @apply inline-flex items-center gap-1.5 rounded-pill px-2.5 py-1 text-xs font-medium;
   }
   .ad-btn-primary {
-    @apply inline-flex items-center justify-center gap-2 rounded-md bg-cyan-500 px-4 py-2 text-sm font-semibold text-white shadow-soft transition hover:bg-cyan-600 focus:outline-none focus:ring-2 focus:ring-cyan-300;
+    @apply inline-flex cursor-pointer items-center justify-center gap-2 rounded-md bg-cyan-500 px-5 py-2.5 text-sm font-semibold text-white shadow-soft transition-colors duration-200 hover:bg-cyan-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400 focus-visible:ring-offset-2;
   }
   .ad-btn-ghost {
-    @apply inline-flex items-center justify-center gap-2 rounded-md px-3 py-2 text-sm font-medium text-navy-700 transition hover:bg-mist;
+    @apply inline-flex cursor-pointer items-center justify-center gap-2 rounded-md px-4 py-2.5 text-sm font-medium text-navy-700 transition-colors duration-200 hover:bg-mist focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400 focus-visible:ring-offset-2;
+  }
+  .ad-btn-dark {
+    @apply inline-flex cursor-pointer items-center justify-center gap-2 rounded-md border border-navy-700 bg-navy-900 px-5 py-2.5 text-sm font-semibold text-white shadow-soft transition-colors duration-200 hover:bg-navy-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400 focus-visible:ring-offset-2;
+  }
+  .ad-section {
+    @apply mx-auto w-full max-w-6xl px-6;
+  }
+  .ad-eyebrow {
+    @apply text-xs font-semibold uppercase tracking-[0.14em] text-cyan-700;
+  }
+  .ad-h2 {
+    @apply text-balance text-3xl font-semibold tracking-tight text-navy-900 sm:text-4xl;
+  }
+  .ad-subtle {
+    @apply text-base text-slate sm:text-lg;
+  }
+}
+
+@layer utilities {
+  .grid-bg {
+    background-image:
+      linear-gradient(to right, rgba(10, 31, 61, 0.05) 1px, transparent 1px),
+      linear-gradient(to bottom, rgba(10, 31, 61, 0.05) 1px, transparent 1px);
+    background-size: 56px 56px;
+    mask-image: radial-gradient(ellipse 80% 60% at 50% 0%, #000 0%, transparent 70%);
+  }
+  .text-balance {
+    text-wrap: balance;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
   }
 }
